@@ -1,0 +1,10 @@
+*~
+*.cache
+*.in
+*/stamp-h1
+*.DS_Store
+*/Makefile
+*/configure
+*.status
+*.log
+*/config.h

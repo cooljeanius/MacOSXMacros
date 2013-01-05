@@ -7,6 +7,10 @@ dnl
 dnl Usage: EBG_MACOSX_OPTIONS to include everything
 dnl Usage: EBG_PROG_* to check for program *
 dnl
+dnl Other macros useful for OS X that I did NOT include in this file are:
+dnl AC_PROG_OBJC (many configure scripts include this anyway so I didn't want to duplicate it)
+dnl gt_INTL_MACOSX (This comes from intlmacosx.m4 from recent Mac versions of gettext, which some people might not have, so I left it out just in case)
+dnl
 
 AC_DEFUN([EBG_PROG_APPLESINGLE],
 [
@@ -54,6 +58,7 @@ AC_DEFUN([EBG_PROG_IBTOOL],
 AC_PATH_PROG(IBTOOL, ibtool)
   if test "x$IBTOOL" != "x"; then
       AC_MSG_CHECKING(for ibtool version)
+      dnl FIXME: Output is in plist format, figure out what to do with it
       IBTOOL_VERSION=`ibtool --version`
       printf "\n"
       AC_MSG_RESULT([$IBTOOL_VERSION])
@@ -149,6 +154,25 @@ AC_PATH_PROG(XED, xed)
   fi
 ])
 
+AC_DEFUN([EBG_DEVELOPER_DIR],
+[
+AC_MSG_CHECKING(--with-developer-dir argument)
+AC_ARG_WITH(developer-dir, [  --with-developer-dir=PATH    use PATH as location for Xcode developer tools],
+  DEVELOPER_DIR="$withval"; AC_MSG_RESULT($DEVELOPER_DIR),
+      DEVELOPER_DIR=""; AC_MSG_RESULT(not present))
+  
+if test "x$DEVELOPER_DIR" = "x"; then
+  AC_PATH_PROG(XCODE_SELECT, xcode-select)
+  if test "x$XCODE_SELECT" != "x"; then
+    AC_MSG_CHECKING(for developer dir using xcode-select)
+    DEVELOPER_DIR=`$XCODE_SELECT -print-path`
+    AC_MSG_RESULT([$DEVELOPER_DIR])
+  else
+    DEVELOPER_DIR=/Developer
+  fi
+fi
+])
+
 dnl
 dnl Now that we have all the sub-macros out of the way, it's time for the main one
 dnl
@@ -172,21 +196,9 @@ if test "`(uname) 2>/dev/null`" = Darwin; then
   AC_ARG_WITH(mac-arch, [  --with-mac-arch=ARCH    current, intel, ppc or both],
 	MACARCH="$withval"; AC_MSG_RESULT($MACARCH),
 	MACARCH="current"; AC_MSG_RESULT(defaulting to $MACARCH))
-
-  AC_MSG_CHECKING(--with-developer-dir argument)
-  AC_ARG_WITH(developer-dir, [  --with-developer-dir=PATH    use PATH as location for Xcode developer tools],
-	DEVELOPER_DIR="$withval"; AC_MSG_RESULT($DEVELOPER_DIR),
-        DEVELOPER_DIR=""; AC_MSG_RESULT(not present))
-  if test "x$DEVELOPER_DIR" = "x"; then
-    AC_PATH_PROG(XCODE_SELECT, xcode-select)
-    if test "x$XCODE_SELECT" != "x"; then
-      AC_MSG_CHECKING(for developer dir using xcode-select)
-      DEVELOPER_DIR=`$XCODE_SELECT -print-path`
-      AC_MSG_RESULT([$DEVELOPER_DIR])
-    else
-      DEVELOPER_DIR=/Developer
-    fi
-  fi
+  
+  EBG_DEVELOPER_DIR
+  
   AC_PATH_PROG(AGVTOOL, agvtool)
   AC_PATH_PROG(APPLEPING, appleping)
   EBG_PROG_APPLESINGLE
