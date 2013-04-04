@@ -152,7 +152,7 @@ AC_DEFUN([EBG_PROG_XED],
 [
 AC_PATH_PROG([XED], [xed])
   if test "x$XED" != "x"; then
-      AC_MSG_CHECKING(for xed version)
+      AC_MSG_CHECKING([for xed version])
       XED_VERSION=`xed --version`
       AC_MSG_RESULT([$XED_VERSION])
   fi
@@ -164,16 +164,24 @@ AC_MSG_CHECKING([--with-developer-dir argument])
 AC_ARG_WITH([developer-dir], [  --with-developer-dir=PATH    use PATH as location for Xcode developer tools],
   [DEVELOPER_DIR="$withval"; AC_MSG_RESULT([$DEVELOPER_DIR])],
       [DEVELOPER_DIR=""; AC_MSG_RESULT([not present])])
-  
+
+AC_MSG_CHECKING([if DEVELOPER_DIR environment variable is already set])
 if test "x$DEVELOPER_DIR" = "x"; then
+  AC_MSG_RESULT([no])
   AC_PATH_PROG([XCODE_SELECT], [xcode-select])
   if test "x$XCODE_SELECT" != "x"; then
+    AC_MSG_CHECKING([for xcode-select version])
+    XCODE_SELECT_VERSION=`xcode-select --version`
+    AC_MSG_RESULT([$XCODE_SELECT_VERSION])
     AC_MSG_CHECKING([for developer dir using xcode-select])
     DEVELOPER_DIR=`$XCODE_SELECT -print-path`
     AC_MSG_RESULT([$DEVELOPER_DIR])
   else
     DEVELOPER_DIR=/Developer
+    AC_MSG_RESULT([$DEVELOPER_DIR])
   fi
+else
+  AC_MSG_RESULT([$DEVELOPER_DIR])
 fi
 ])
 
@@ -407,6 +415,50 @@ AC_DEFUN([MP_CHECK_FRAMEWORK_IOKIT], [
 	AC_SUBST(HAVE_FRAMEWORK_IOKIT)
 ])
 
+#
+# Return MacOSX version using system_profile tool.
+# Taken from Scilab's macros
+#
+AC_DEFUN([AC_GET_MACOSX_VERSION],[
+    if test "x$DEFAULTS" = "x"; then
+        AC_PATH_PROG([DEFAULTS], [defaults])
+    fi
+    AC_PATH_PROG([SW_VERS], [sw_vers])
+    AC_PATH_PROG([UNAME], [uname])
+    AC_MSG_CHECKING([how to determine Mac OS X Version])
+    if test -e $HOME/Library/Preferences/com.apple.loginwindow.plist -a "x$DEFAULTS" != "x"; then
+        AC_MSG_RESULT([using "defaults"])
+    	[macosx_version="`defaults read loginwindow SystemVersionStampAsString`"]
+    elif test "x$SW_VERS" != "x"; then
+        AC_MSG_RESULT([using "sw_vers"])
+        [macosx_version="`sw_vers -productVersion`"]
+    elif test "x$UNAME" != "x"; then
+        AC_MSG_RESULT([using "uname"])
+        [darwin_version="`uname -r | cut -d. -f1`"]
+        [macosx_version=10.$(($darwin_version - 4))]
+    else
+        AC_MSG_ERROR([none of the standard ways of determining the Mac OS X Version are available])
+    fi
+    AC_MSG_CHECKING([Mac OS X Version])
+    case $macosx_version in
+         10.8*)
+              AC_MSG_RESULT([Mac OS X 10.8 - Mountain Lion.])
+         ;;
+         10.7*)
+              AC_MSG_RESULT([Mac OS X 10.7 - Lion.])
+         ;;
+         10.6*)
+              AC_MSG_RESULT([Mac OS X 10.6 - Snow Leopard.])
+         ;;
+         *10.5*)
+              AC_MSG_RESULT([Mac OS X 10.5 - Leopard.])
+         ;;
+         *)
+              AC_MSG_ERROR([MacOSX 10.5, 10.6, 10.7 or 10.8 are needed. Found $macosx_version])
+         ;;
+	 esac
+])
+
 dnl
 dnl Now that we have all the sub-macros out of the way, it's time for the main one
 dnl
@@ -592,6 +644,7 @@ if test "`(uname) 2>/dev/null`" = Darwin; then
   MP_CHECK_FUNCTION_CFNOTIFICATIONCENTERGETDARWINNOTIFYCENTER
   MP_CHECK_FRAMEWORK_SYSTEMCONFIGURATION
   MP_CHECK_FRAMEWORK_IOKIT
+  AC_GET_MACOSX_VERSION
 
   dnl Avoid a bug with -O2 with gcc 4.0.1.  Symptom: malloc() reports double
   dnl free.  This happens in expand_filename(), because the optimizer swaps
