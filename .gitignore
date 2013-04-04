@@ -8,3 +8,5 @@
 *.status
 *.log
 */config.h
+*/install-sh
+*/missing

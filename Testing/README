@@ -1,5 +1,0 @@
-This folder is for testing my m4 macros in the m4 file at the top level of
-this repository. To run the tests, generate a configure script with 
-Autotools, and then run the resulting script. (If you don't know what 
-Autotools are or how to use them, this repository probably won't be of any 
-use to you)
