@@ -184,14 +184,24 @@ AC_PATH_PROG([XCODEBUILD],[xcodebuild])
       XCODEBUILD_VERSION=`xcodebuild -version`
       AC_MSG_RESULT([$XCODEBUILD_VERSION])
   fi
+])
+
+dnl#
+AC_DEFUN([EBG_PROG_XCODEBUILD_WITHSDKS],
+[
+AC_REQUIRE([EBG_PROG_XCODEBUILD])
   if test "x$XCODEBUILD" != "x"; then
       AC_MSG_CHECKING([for available Xcode sdks])
       dnl# FIXME: Format output properly for long sdk names so they do not
       dnl# start including the next field over. See for example what
       dnl# happens when you have a Darwinbuild-created sdk present
       XCODE_SDKS=`xcodebuild -showsdks | grep sdk | cut -d\  -f1,2,3,4`
-      printf "\n The available Xcode sdks are: \n"
-      AC_MSG_RESULT([$XCODE_SDKS])
+      if test "x$XCODE_SDKS" != "x"; then
+        printf "\n The available Xcode sdks are: \n"
+        AC_MSG_RESULT([$XCODE_SDKS])
+      else
+        AC_MSG_WARN([no sdks found])
+      fi
   fi
 ])
 
