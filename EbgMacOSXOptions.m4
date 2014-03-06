@@ -12,7 +12,8 @@ dnl# - AC_PROG_OBJC had previously been left out, but I have found out how
 dnl# use `AC_REQUIRE([])` since then.
 dnl# - gt_INTL_MACOSX (This comes from intlmacosx.m4 from recent Mac
 dnl# versions of gettext, which some people might not have, so I left it
-dnl# out just in case)
+dnl# out just in case - see EbgMacOSXOptions_Extra.m4 for macros with
+dnl# dependencies on macros from outside this package)
 dnl#
 
 dnl#
@@ -30,14 +31,19 @@ dnl# I had a version of this macro that I vendored into my fork of the
 dnl# c99-to-c89 package that compared its version against a
 dnl# requested one. The only problem was that it relied on the
 dnl# AX_COMPARE_VERSION macro, and I do not necessarily want to add a
-dnl# dependency on the autoconf-archive here...
+dnl# dependency on the autoconf-archive here... (that is what the other
+dnl# file, EbgMacOSXOptions_Extra.m4 is for)
 AC_DEFUN([EBG_PROG_CLANG],
 [
 AC_PATH_PROG([CLANG],[clang])
   if test "x${CLANG}" != "x"; then
       AC_MSG_CHECKING([for clang version])
-      CLANG_VERSION=`clang --version | head -n 1`
+      #TODO: make sure the location of the actual version number in the
+      # version string is consistent between releases, so that the pipe
+      # through 'cut' will work properly:
+      export CLANG_VERSION=`clang --version | head -n 1 | cut -d\  -f4`
       AC_MSG_RESULT([${CLANG_VERSION}])
+      AC_SUBST([CLANG_VERSION])
   fi
 ])
 
@@ -564,7 +570,11 @@ if test "`(uname) 2>/dev/null`" = Darwin; then
 	[MACARCH="current"; AC_MSG_RESULT([defaulting to ${MACARCH}])])
 
   AC_REQUIRE([EBG_DEVELOPER_DIR])
+
+  AC_REQUIRE([AC_USE_SYSTEM_EXTENSIONS])
+
   AC_REQUIRE([AC_PROG_CPP])
+  AC_REQUIRE([AC_PROG_CXX])
   AC_REQUIRE([AC_PROG_OBJC])
   AC_REQUIRE([AC_PROG_OBJCPP])
   AC_REQUIRE([AC_PROG_OBJCXX])
@@ -687,6 +697,7 @@ if test "`(uname) 2>/dev/null`" = Darwin; then
   AC_PATH_PROG([XGRID],[xgrid])
 
   AC_REQUIRE([AC_C_BIGENDIAN])
+  AC_REQUIRE([AC_SYS_LARGEFILE])
 
   if test "x${MACARCH}" = "xboth"; then
     AC_MSG_CHECKING([specifically for 10.4 universal SDK])

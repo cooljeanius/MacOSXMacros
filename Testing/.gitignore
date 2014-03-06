@@ -1,2 +1,5 @@
 configure.scan
 confdefs.h
+ltmain.sh
+config.guess
+config.sub
