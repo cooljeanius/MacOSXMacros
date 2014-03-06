@@ -4,27 +4,51 @@
 PortSystem          1.0
 PortGroup           github 1.0
 
-github.setup        cooljeanius MacOSXMacros 0.0.1 v
+github.setup        cooljeanius MacOSXMacros 0.0.3 v
 license             Permissive
 categories          devel
 maintainers         gwmail.gwu.edu:egall
 description         Autoconf macros for checking stuff specific to OS X.
 long_description    ${description}
+supported_archs     noarch
 
 platforms           darwin
 
 fetch.type          git
 git.url             git://github.com/cooljeanius/MacOSXMacros.git
 
+depends_run-append  port:xml2
+
 use_configure       no
 
-build {}
+build {
+    ui_msg "Fixing permissions..."
+    #TODO: do this in Tcl instead of shelling out to system:
+    system -W ${worksrcpath} "chmod -x ./*.m4 ./*.md"
+}
 
-test.cmd            system -W ${worksrcpath}/Testing "autoreconf && ./configure --prefix=${prefix}"
+# Making a variant until https://trac.macports.org/ticket/38208 is fixed
+variant tests description {Run tests} {
+    depends_build-append \
+                    port:autoconf \
+                    port:autoconf-archive \
+                    port:automake \
+                    port:libtool \
+                    port:gettext \
+                    port:xml2 \
+                    port:xorg-util-macros \
+                    port:curl \
+                    port:gawk
+    test.run        yes
+    test.cmd        "cd ${worksrcpath}/Testing && autoreconf -fvi -Wall && ./configure --prefix=${prefix} --enable-maintainer-mode && make"
+}
+
+#TODO: split the "_Extra" m4 file off into a separate variant with its own
+# dependencies and test command
 
 destroot {
     xinstall -d ${destroot}${prefix}/share/aclocal
-    eval xinstall [glob ${worksrcpath}/*.m4] ${destroot}${prefix}/share/aclocal
+    eval xinstall -m 644 [glob ${worksrcpath}/*.m4] ${destroot}${prefix}/share/aclocal
     xinstall -d ${destroot}${prefix}/share/doc/${name}
-    eval xinstall [glob ${worksrcpath}/*.md] ${destroot}${prefix}/share/doc/${name}
+    eval xinstall -m 644 [glob ${worksrcpath}/*.md] ${destroot}${prefix}/share/doc/${name}
 }

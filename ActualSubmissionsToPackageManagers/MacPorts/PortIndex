@@ -1,0 +1,2 @@
+MacOSXMacros 426
+variants tests portdir devel/MacOSXMacros description {Autoconf macros for checking stuff specific to OS X.} depends_fetch bin:git:git-core homepage https://github.com/cooljeanius/MacOSXMacros depends_run port:xml2 epoch 0 platforms darwin name MacOSXMacros long_description {{Autoconf macros for checking stuff specific to OS X.}} maintainers gwmail.gwu.edu:egall license Permissive categories devel version 0.0.3 revision 0
