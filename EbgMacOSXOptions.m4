@@ -521,6 +521,13 @@ AC_DEFUN([AC_GET_MACOSX_VERSION],[
     fi
     AC_MSG_CHECKING([Mac OS X Version])
     case ${macosx_version} in
+         11.*)
+              AC_MSG_RESULT([macOS 11 - Big Sur])
+              AC_MSG_WARN([there has been a big gap since the previous tested version; expect breakages])
+              ;;
+         10.9*)
+              AC_MSG_RESULT([Mac OS X 10.9 - Mavericks.])
+              ;;
          10.8*)
               AC_MSG_RESULT([Mac OS X 10.8 - Mountain Lion.])
          ;;
